@@ -1,3 +1,7 @@
+#    Matthew Lauhakamin
+#    860989596
+#    mlauh001@ucr.edu
+
 import sys
 import re
 import time
@@ -10,14 +14,62 @@ edges=[]
 
 def BellmanFord(G):
     pathPairs=[]
-    # Fill in your Bellman-Ford algorithm here
-    # The pathPairs list will contain the list of vertex pairs and their weights [((s,t),w),...]
+    # [((s,t),w)]
+    d = {}
+    p = {}
+    for source in G[0]:
+        for node in G[0]:
+            d[node] = float('inf')
+            p[node] = None
+        if source >= len(G[0]):
+            return
+        d[source] = 0
+        for i in range(len(G[0])-1):
+            for u in G[0]:
+                for v in range(len(G[1])):
+                    if d[v] > d[u] + G[1][u][v]:
+                        d[v] = d[u] + G[1][u][v]
+                        p[v] = u
+        for u in G[0]:
+            for v in range(len(G[1])):
+                if d[v] > d[u] + G[1][u][v]:
+                    print ("Negative edge detected in Bellman-Ford!")
+                    return
+        for i in range(len(d)):
+            pathPairs.append(((source,i),d[i]))
+    print("Bellman-Ford Pairs: \n" + str(pathPairs) + "\n")
     return pathPairs
 
 def FloydWarshall(G):
     pathPairs=[]
-    # Fill in your Floyd-Warshall algorithm here
-    # The pathPairs list will contain the list of vertex pairs and their weights [((s,t),w),...]
+    # [((s,t),w)]
+    m = G[1]
+    d = {}
+    p = {}
+    for source in G[0]:
+        for node in G[0]:
+            d[node] = float('inf')
+            p[node] = None
+        if source >= len(G[0]):
+            return
+        d[source] = 0
+        for k in range(len(G[0])):
+            for u in range(len(G[0])):
+                for v in range(len(G[0])):
+                    m[u][v] = G[1][u][v]
+                    if d[v] > d[u] + G[1][u][v]:
+                        d[v] = d[u] + G[1][u][v]
+                        p[v] = u
+                    if m[u][v] > m[u][k] + m[k][v]:
+                        m[u][v] = m[u][k] + m[k][v]
+        for u in G[0]:
+            for v in range(len(G[1])):
+                if d[v] > d[u] + G[1][u][v]:
+                    print ("Negative edge detected in Floyd-Warshall!")
+                    return
+        for i in range(len(d)):
+            pathPairs.append(((source,i),d[i]))
+    print("Floyd-Warshall Pairs: \n" + str(pathPairs) + "\n")
     return pathPairs
 
 def readFile(filename):
@@ -49,7 +101,7 @@ def readFile(filename):
             if int(source) > len(vertices) or int(sink) > len(vertices):
                 print("Attempting to insert an edge between "+source+" and "+sink+" in a graph with "+vertices+" vertices")
                 quit(1)
-            weight=edgeMatch.group(3)
+            weight=int(edgeMatch.group(3)) # bugfix: converted str to int
             edges[int(source)-1][int(sink)-1]=weight
     #Debugging
     #for i in G:
@@ -70,7 +122,7 @@ def main(filename,algorithm):
         BellmanFord(G)
         end=time.clock()
         BFTime=end-start
-        start=time.clock() //Swapped line 73 and line 74
+        start=time.clock() # bugfix: swapped line 73 and line 74
         FloydWarshall(G)
         end=time.clock()
         FWTime=end-start
